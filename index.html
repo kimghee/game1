@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>가위 바위 보 게임</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Arial', sans-serif;
+      }
+
+      body {
+        background-color: #f5f5f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .game-container {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        width: 100%;
+        padding: 20px;
+      }
+
+      h1 {
+        color: #3949ab;
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 28px;
+      }
+
+      .battle-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+
+      .player-choice,
+      .computer-choice {
+        text-align: center;
+        width: 40%;
+      }
+
+      .vs {
+        font-size: 24px;
+        font-weight: bold;
+        color: #444;
+      }
+
+      .choice-display {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #eee;
+        border-radius: 5px;
+      }
+
+      .result {
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+
+      .choices {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .choice-btn {
+        font-size: 16px;
+        font-weight: bold;
+        padding: 12px 20px;
+        border-radius: 5px;
+        border: none;
+        background-color: #3949ab;
+        color: white;
+        cursor: pointer;
+        transition: transform 0.2s, background-color 0.2s;
+      }
+
+      .choice-btn:hover {
+        background-color: #283593;
+        transform: scale(1.05);
+      }
+
+      .choice-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .score-board {
+        display: flex;
+        justify-content: space-between;
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+
+      .player-score,
+      .computer-score {
+        text-align: center;
+        width: 45%;
+      }
+
+      .score {
+        font-size: 24px;
+        font-weight: bold;
+        margin-top: 5px;
+      }
+
+      .history {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+
+      .history h3 {
+        text-align: center;
+        margin-bottom: 10px;
+        color: #444;
+      }
+
+      .history-list {
+        max-height: 150px;
+        overflow-y: auto;
+      }
+
+      .history-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .history-item:last-child {
+        border-bottom: none;
+      }
+
+      .win {
+        color: #4caf50;
+      }
+
+      .lose {
+        color: #f44336;
+      }
+
+      .draw {
+        color: #757575;
+      }
+
+      .reset-btn {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .reset-btn:hover {
+        background-color: #d32f2f;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game-container">
+      <h1>가위 바위 보 게임</h1>
+
+      <div class="battle-area">
+        <div class="player-choice">
+          <h2>당신</h2>
+          <div class="choice-display" id="player-display">?</div>
+        </div>
+
+        <div class="vs">VS</div>
+
+        <div class="computer-choice">
+          <h2>컴퓨터</h2>
+          <div class="choice-display" id="computer-display">?</div>
+        </div>
+      </div>
+
+      <div class="result" id="result">게임을 시작하세요!</div>
+
+      <div class="choices">
+        <button class="choice-btn" id="rock">바위</button>
+        <button class="choice-btn" id="paper">보</button>
+        <button class="choice-btn" id="scissors">가위</button>
+      </div>
+
+      <div class="score-board">
+        <div class="player-score">
+          <h3>당신</h3>
+          <div class="score" id="player-score">0</div>
+        </div>
+        <div class="computer-score">
+          <h3>컴퓨터</h3>
+          <div class="score" id="computer-score">0</div>
+        </div>
+      </div>
+
+      <div class="history" id="history-container" style="display: none">
+        <h3>게임 기록</h3>
+        <div class="history-list" id="history-list"></div>
+      </div>
+
+      <button class="reset-btn" id="reset-btn">게임 초기화</button>
+    </div>
+
+    <script>
+      // 게임 상태 변수
+      let playerScore = 0;
+      let computerScore = 0;
+      let gameHistory = [];
+      let isAnimating = false;
+
+      // DOM 요소 선택
+      const playerDisplay = document.getElementById('player-display');
+      const computerDisplay = document.getElementById('computer-display');
+      const resultDisplay = document.getElementById('result');
+      const playerScoreDisplay = document.getElementById('player-score');
+      const computerScoreDisplay = document.getElementById('computer-score');
+      const historyContainer = document.getElementById('history-container');
+      const historyList = document.getElementById('history-list');
+      const resetBtn = document.getElementById('reset-btn');
+      const choiceButtons = document.querySelectorAll('.choice-btn');
+
+      // 선택 옵션 매핑
+      const choices = {
+        rock: { name: '바위', beats: 'scissors' },
+        paper: { name: '보', beats: 'rock' },
+        scissors: { name: '가위', beats: 'paper' },
+      };
+
+      // 게임 로직
+      function play(playerChoice) {
+        if (isAnimating) return;
+
+        isAnimating = true;
+        disableButtons(true);
+
+        // 애니메이션 효과
+        playerDisplay.textContent = '?';
+        computerDisplay.textContent = '?';
+        resultDisplay.textContent = '선택 중...';
+
+        setTimeout(() => {
+          // 컴퓨터 선택
+          const choicesList = ['rock', 'paper', 'scissors'];
+          const computerChoice =
+            choicesList[Math.floor(Math.random() * choicesList.length)];
+
+          // 선택 표시
+          playerDisplay.textContent = choices[playerChoice].name;
+          computerDisplay.textContent = choices[computerChoice].name;
+
+          // 결과 계산
+          const result = getResult(playerChoice, computerChoice);
+
+          // 결과 표시
+          showResult(result, playerChoice, computerChoice);
+
+          // 게임 기록 추가
+          addToHistory(playerChoice, computerChoice, result);
+
+          isAnimating = false;
+          disableButtons(false);
+        }, 800);
+      }
+
+      // 결과 계산 함수
+      function getResult(playerChoice, computerChoice) {
+        if (playerChoice === computerChoice) {
+          return 'draw';
+        } else if (choices[playerChoice].beats === computerChoice) {
+          playerScore++;
+          playerScoreDisplay.textContent = playerScore;
+          return 'win';
+        } else {
+          computerScore++;
+          computerScoreDisplay.textContent = computerScore;
+          return 'lose';
+        }
+      }
+
+      // 결과 표시 함수
+      function showResult(result, playerChoice, computerChoice) {
+        switch (result) {
+          case 'win':
+            resultDisplay.textContent = '승리했습니다!';
+            resultDisplay.className = 'result win';
+            break;
+          case 'lose':
+            resultDisplay.textContent = '패배했습니다!';
+            resultDisplay.className = 'result lose';
+            break;
+          case 'draw':
+            resultDisplay.textContent = '무승부입니다!';
+            resultDisplay.className = 'result draw';
+            break;
+        }
+      }
+
+      // 게임 기록 추가 함수
+      function addToHistory(playerChoice, computerChoice, result) {
+        // 기록에 추가
+        gameHistory.unshift({
+          playerChoice,
+          computerChoice,
+          result,
+        });
+
+        // 최대 5개까지만 유지
+        if (gameHistory.length > 5) {
+          gameHistory.pop();
+        }
+
+        // 기록 표시
+        updateHistoryDisplay();
+      }
+
+      // 기록 표시 업데이트 함수
+      function updateHistoryDisplay() {
+        if (gameHistory.length > 0) {
+          historyContainer.style.display = 'block';
+          historyList.innerHTML = '';
+
+          gameHistory.forEach((game) => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+
+            const matchup = document.createElement('span');
+            matchup.textContent = `${choices[game.playerChoice].name} vs ${
+              choices[game.computerChoice].name
+            }`;
+
+            const resultText = document.createElement('span');
+            switch (game.result) {
+              case 'win':
+                resultText.textContent = '승리';
+                resultText.className = 'win';
+                break;
+              case 'lose':
+                resultText.textContent = '패배';
+                resultText.className = 'lose';
+                break;
+              case 'draw':
+                resultText.textContent = '무승부';
+                resultText.className = 'draw';
+                break;
+            }
+
+            historyItem.appendChild(matchup);
+            historyItem.appendChild(resultText);
+            historyList.appendChild(historyItem);
+          });
+        } else {
+          historyContainer.style.display = 'none';
+        }
+      }
+
+      // 버튼 비활성화 함수
+      function disableButtons(disabled) {
+        choiceButtons.forEach((button) => {
+          button.disabled = disabled;
+        });
+      }
+
+      // 게임 초기화 함수
+      function resetGame() {
+        playerScore = 0;
+        computerScore = 0;
+        gameHistory = [];
+
+        playerScoreDisplay.textContent = '0';
+        computerScoreDisplay.textContent = '0';
+        playerDisplay.textContent = '?';
+        computerDisplay.textContent = '?';
+        resultDisplay.textContent = '게임을 시작하세요!';
+        resultDisplay.className = 'result';
+
+        historyContainer.style.display = 'none';
+        historyList.innerHTML = '';
+      }
+
+      // 이벤트 리스너 등록
+      document
+        .getElementById('rock')
+        .addEventListener('click', () => play('rock'));
+      document
+        .getElementById('paper')
+        .addEventListener('click', () => play('paper'));
+      document
+        .getElementById('scissors')
+        .addEventListener('click', () => play('scissors'));
+      resetBtn.addEventListener('click', resetGame);
+    </script>
+  </body>
+</html>
